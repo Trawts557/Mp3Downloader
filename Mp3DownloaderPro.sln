@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36203.30
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mp3DownloaderPro", "Mp3DownloaderPro\Mp3DownloaderPro.csproj", "{62EE034F-9272-4957-99E8-DC8FE271E8C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Mp3DownloaderPro\Utils\UrlValidator.cs = Mp3DownloaderPro\Utils\UrlValidator.cs
+		Mp3DownloaderPro\Utils\YoutubeUtils.cs = Mp3DownloaderPro\Utils\YoutubeUtils.cs
+		Mp3DownloaderPro\Utils\YtDlpHelper.cs = Mp3DownloaderPro\Utils\YtDlpHelper.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{329F1AF2-995C-4FB9-B52D-2A686D6E3228}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62EE034F-9272-4957-99E8-DC8FE271E8C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62EE034F-9272-4957-99E8-DC8FE271E8C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62EE034F-9272-4957-99E8-DC8FE271E8C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62EE034F-9272-4957-99E8-DC8FE271E8C8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47894AA6-2377-4A94-A065-6D10399D4C8E}
+	EndGlobalSection
+EndGlobal
