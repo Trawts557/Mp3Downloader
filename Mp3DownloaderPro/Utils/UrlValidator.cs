@@ -20,46 +20,26 @@ namespace Mp3DownloaderPro.Utils
             return url;
         }
 
-        public static string GetUrlType(this string url)
+        public static UrlType GetUrlType(this string url)
         {
 
-            if (url.Contains("list=RD"))
+            if (url.Contains("list=RD", StringComparison.OrdinalIgnoreCase))
             {
-                return "Mix";
+                return UrlType.Mix;
             }
 
-            try
-
+            else if (url.Contains("playlist?list=", StringComparison.OrdinalIgnoreCase))
             {
-                var videoId = VideoId.Parse(url);
-                return "Video";
+                return UrlType.Playlist;
             }
 
-            catch(ArgumentException)
+            else if (url.Contains("watch?v=", StringComparison.OrdinalIgnoreCase))
             {
-
+                return UrlType.Video;
             }
 
-            try
-            {
-                var playlistId = PlaylistId.Parse(url);
-                return "Playlist";
-            }
+            return UrlType.Invalid;
 
-            catch (ArgumentException)
-            {
-
-            }
-
-            return "Link no valido";
-
-        }
-
-        public static string GetSafeFileName(this string title, string extension)
-        {
-            var invalidChars = Path.GetInvalidFileNameChars();
-            var safeName = string.Join("_", title.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
-            return safeName + extension;
         }
     }
 }

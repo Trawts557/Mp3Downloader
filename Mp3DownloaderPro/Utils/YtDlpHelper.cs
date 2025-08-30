@@ -15,7 +15,7 @@ namespace Mp3DownloaderPro.Utils
             var psi = new ProcessStartInfo
             {
                 FileName = @"C:\yt-dlp\yt-dlp.exe",
-                Arguments = $"--no playlist -x --audio-format mp3 -o \"{outputFolder}\\%(title)s.%(ext)s\" {url}",
+                Arguments = $"--no-playlist -x --audio-format mp3 -o \"{outputFolder}\\%(title)s.%(ext)s\" {url}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

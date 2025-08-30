@@ -1,16 +1,18 @@
 ﻿using AngleSharp.Text;
 using Mp3DownloaderPro.Utils;
+using System.Linq;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using System.Linq;
+using YoutubeExplode.Videos;
 
 namespace Mp3DownloaderPro
 {
     public partial class Form1 : Form
     {
         private readonly YoutubeClient _youtubeClient;
-        private List<string> lPlaylist = new List<string>(); 
-
+        private List<string> lPlaylist = [];
+        private string Url => LinkTxt.Text;
+        private string OutputFolder => txtOutputFolder.Text;
 
         public Form1()
         {
@@ -32,19 +34,18 @@ namespace Mp3DownloaderPro
         private void Form1_Load(object sender, EventArgs e)
         {
             listView1.View = View.Details;
-            listView1.Columns.Add("Video", 600); // ancho de la columna
+            listView1.Columns.Add("Video", 600);
             listView1.Columns.Add("Estado", 200);
-
         }
         private void btnFolderPath_Click(object sender, EventArgs e)
         {
-            using (var fbd = new FolderBrowserDialog())
+            using var fbd = new FolderBrowserDialog();
+
+            if (fbd.ShowDialog() == DialogResult.OK)
             {
-                if (fbd.ShowDialog() == DialogResult.OK)
-                {
-                    txtOutputFolder.Text = fbd.SelectedPath;
-                }
+                txtOutputFolder.Text = fbd.SelectedPath;
             }
+
         }
 
         private async void btnDownload_Click(object sender, EventArgs e)
@@ -53,46 +54,38 @@ namespace Mp3DownloaderPro
 
             try
             {
-
-                var url = LinkTxt.Text;
-
-                if (string.IsNullOrWhiteSpace(txtOutputFolder.Text))
-                {
-                    MessageBox.Show("Debe insertar una ubicacion para realizar la descarga");
-                    return;
-                }
-
-
-
-                var outputFolder = txtOutputFolder.Text;
-
                 var progress = new Progress<int>(percent =>
                 {
                     int safePercent = Math.Max(0, Math.Min(100, percent));
                     progressBar1.Value = safePercent;
                 });
 
-                if (url.GetUrlType() == "Video")
+                if (string.IsNullOrWhiteSpace(txtOutputFolder.Text))
                 {
-                    var video = await _youtubeClient.Videos.GetAsync(url);
-
-                    await YtDlpHelper.DownloadVideoAsync(url, outputFolder, progress);
-
-                }
-                else if (url.GetUrlType() == "Playlist")
-                {
-                    // CREAR UNA COPIA DE LA LISTA para iterar de forma segura
-                    var videosToDownload = new List<string>(lPlaylist);
-
-                    foreach (var videoUrl in videosToDownload)
-                    {
-                        var cleanedUrl = videoUrl.GetCleanVideoUrl();
-                        await YtDlpHelper.DownloadVideoAsync(cleanedUrl, outputFolder, progress);
-                    }
-
+                    throw new Exception("Debe insertar una ubicacion para realizar la descarga");
                 }
 
+                switch (Url.GetUrlType())
+                {
+                    case UrlType.Video:
 
+                        var video = await _youtubeClient.Videos.GetAsync(Url);
+
+                        await YtDlpHelper.DownloadVideoAsync(Url, OutputFolder, progress);
+                        break;
+
+                    case UrlType.Playlist:
+
+                        // CREA UNA COPIA DE LA LISTA para iterar de forma segura
+                        var videosToDownload = new List<string>(lPlaylist);
+
+                        foreach (var videoUrl in videosToDownload)
+                        {
+                            var cleanedUrl = videoUrl.GetCleanVideoUrl();
+                            await YtDlpHelper.DownloadVideoAsync(cleanedUrl, OutputFolder, progress);
+                        }
+                        break;
+                }
 
                 MessageBox.Show("Descarga completada con éxito!");
 
@@ -117,56 +110,66 @@ namespace Mp3DownloaderPro
             //Playlist https://www.youtube.com/playlist?list=PLA5VzP2LmrYdYqyDxjx72P_O45rwm2VTx
 
             btnGetVideos.Enabled = false;
-            var url = LinkTxt.Text;
-            
+            btnDownload.Enabled = false;
 
             try
             {
                 listView1.Items.Clear();
 
-                if (url.GetUrlType() == "Link no valido")
-                {
-                    MessageBox.Show("Debe insertar un enlace");
-                }
-
-                if (url.GetUrlType() == "Video")
-                {
-                    var video = await _youtubeClient.Videos.GetAsync(url);
-
-                    AddVideoToList(video.Title, video.Url);
-                    btnDownload.Enabled = true;
-                }
-
-                else if (url.GetUrlType() == "Playlist")
-                {
-                    var playlist = await _youtubeClient.Playlists.GetVideosAsync(url).CollectAsync();
-
-                    foreach (var video in playlist)
-                    {
-                        AddVideoToList(video.Title, video.Url);
-                        
-                        lPlaylist.Add(video.Url);
-                    }
-                    btnDownload.Enabled = true;
-                }
-
-                else if (url.GetUrlType() == "Mix")
+                switch (Url.GetUrlType())
                 {
 
-                    byte amountOfVideosToDownload = 26;
-                    var playlist = await _youtubeClient.Playlists.GetVideosAsync(url).Take(amountOfVideosToDownload);
-                                      
-                    foreach (var video in playlist)
-                    {
-                        AddVideoToList(video.Title, video.Url);
+                    case UrlType.Invalid:
+                        {
+                            if (Url.GetUrlType() == UrlType.Invalid)
+                            {
+                                throw new Exception("Debe insertar un enlace");
+                            }
+                            break;
+                        }
 
-                        lPlaylist.Add(video.Url);
+                    case UrlType.Video:
+                        {
+                            var video = await _youtubeClient.Videos.GetAsync(Url);
 
-                    }
-                    
-                   
-                    btnDownload.Enabled = true;
+                            AddVideoToList(video.Title, video.Url);
+                            btnDownload.Enabled = true;
+
+                            break;
+                        }
+
+
+                    case UrlType.Playlist:
+                        {
+                            var playlist = await _youtubeClient.Playlists.GetVideosAsync(Url).CollectAsync();
+
+                            foreach (var video in playlist)
+                            {
+                                AddVideoToList(video.Title, video.Url);
+
+                                lPlaylist.Add(video.Url);
+                            }
+                            break;
+                        }
+
+                    case UrlType.Mix:
+                        {
+                            byte amountOfVideosToDownload = 26;
+                            var playlist = await _youtubeClient.Playlists.GetVideosAsync(Url).Take(amountOfVideosToDownload);
+
+                            foreach (var video in playlist)
+                            {
+                                AddVideoToList(video.Title, video.Url);
+
+                                lPlaylist.Add(video.Url);
+
+                            }
+                        }
+
+                        break;
                 }
+
+                btnDownload.Enabled = true;
 
             }
 
@@ -178,6 +181,7 @@ namespace Mp3DownloaderPro
             finally
             {
                 btnGetVideos.Enabled = true;
+
             }
 
         }
@@ -188,9 +192,12 @@ namespace Mp3DownloaderPro
 
             if (listView1.SelectedItems.Count > 0)
             {
-
+                /*
                 var url = item.Tag as string;
                 if (url == null) return;
+                */
+
+                if (item.Tag is not string url) return;
 
                 if (item.Font.Strikeout)
                 {
@@ -219,7 +226,7 @@ namespace Mp3DownloaderPro
             var item = new ListViewItem(title);
             item.Tag = url;
 
-            item.SubItems.Add("Activo"); // Estado inicial
+            item.SubItems.Add("Activo");
             listView1.Items.Add(item);
         }
     }
