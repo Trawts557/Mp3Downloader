@@ -1,9 +1,6 @@
-﻿using AngleSharp.Text;
-using Mp3DownloaderPro.Utils;
-using System.Linq;
+﻿using Mp3DownloaderPro.Utils;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using YoutubeExplode.Videos;
 
 namespace Mp3DownloaderPro
 {
@@ -13,6 +10,7 @@ namespace Mp3DownloaderPro
         private List<string> lPlaylist = [];
         private string Url => LinkTxt.Text;
         private string OutputFolder => txtOutputFolder.Text;
+        private ImageList imageList;
 
         public Form1()
         {
@@ -33,10 +31,30 @@ namespace Mp3DownloaderPro
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            imageList = new ImageList();
+            imageList.ImageSize = new Size(140, 90);
+
             listView1.View = View.Details;
-            listView1.Columns.Add("Video", 600);
-            listView1.Columns.Add("Estado", 200);
+            listView1.SmallImageList = imageList;
+
+            listView1.Columns.Add("Video", 700);
+            listView1.Columns.Add("Estado", -2, HorizontalAlignment.Left);
+
+
         }
+
+        private async Task<Image> DownloadImageAsync(string url)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var bytes = await client.GetByteArrayAsync(url);
+                using (var ms = new MemoryStream(bytes))
+                {
+                    return Image.FromStream(ms);
+                }
+            }
+        }
+
         private void btnFolderPath_Click(object sender, EventArgs e)
         {
             using var fbd = new FolderBrowserDialog();
@@ -132,7 +150,10 @@ namespace Mp3DownloaderPro
                         {
                             var video = await _youtubeClient.Videos.GetAsync(Url);
 
-                            AddVideoToList(video.Title, video.Url);
+                            var thumbnailUrl = video.Thumbnails.GetWithHighestResolution().Url;
+
+                            await AddVideoToList(video.Title, video.Url, video.Id, thumbnailUrl);
+
                             btnDownload.Enabled = true;
 
                             break;
@@ -145,10 +166,13 @@ namespace Mp3DownloaderPro
 
                             foreach (var video in playlist)
                             {
-                                AddVideoToList(video.Title, video.Url);
+                                var thumbnailUrl = video.Thumbnails.GetWithHighestResolution().Url;
+
+                                await AddVideoToList(video.Title, video.Url, video.Id, thumbnailUrl);
 
                                 lPlaylist.Add(video.Url);
                             }
+
                             break;
                         }
 
@@ -159,7 +183,9 @@ namespace Mp3DownloaderPro
 
                             foreach (var video in playlist)
                             {
-                                AddVideoToList(video.Title, video.Url);
+                                var thumbnailUrl = video.Thumbnails.GetWithHighestResolution().Url;
+
+                                await AddVideoToList(video.Title, video.Url, video.Id, thumbnailUrl);
 
                                 lPlaylist.Add(video.Url);
 
@@ -218,16 +244,60 @@ namespace Mp3DownloaderPro
 
                 }
             }
-            
 
         }
-        private void AddVideoToList(string title, string url)
+
+        private async Task AddVideoToList(string title, string url, string videoId, string thumbnailUrl)
         {
+            var image = await DownloadImageAsync(thumbnailUrl);
+
+            if (!imageList.Images.ContainsKey(videoId))
+            {
+                imageList.Images.Add(videoId, image);
+            }
+
             var item = new ListViewItem(title);
             item.Tag = url;
 
+            item.ImageKey = videoId;
             item.SubItems.Add("Activo");
             listView1.Items.Add(item);
+
+        }
+
+        private void listView1_KeyDown_1(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete && listView1.SelectedItems.Count > 0)
+            {
+                foreach (ListViewItem item in listView1.SelectedItems)
+                {
+                    if (item.Tag is string url)
+                    {
+
+                        if (item.Font.Strikeout)
+                        {
+                            item.Font = new Font(item.Font, FontStyle.Regular);
+                            item.ForeColor = Color.Black;
+                            item.SubItems[1].Text = "Activo";
+
+                            lPlaylist.Add(url);
+                        }
+
+                        else
+                        {
+                            item.Font = new Font(item.Font, FontStyle.Strikeout);
+                            item.ForeColor = Color.Gray;
+                            item.SubItems[1].Text = "Inactivo";
+
+                            lPlaylist.Remove(url);
+
+                        }
+
+                    }
+
+
+                }
+            }
         }
     }
 }   

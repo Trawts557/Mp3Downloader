@@ -53,7 +53,7 @@
             // 
             LinkTxt.Location = new Point(150, 40);
             LinkTxt.Name = "LinkTxt";
-            LinkTxt.Size = new Size(618, 23);
+            LinkTxt.Size = new Size(743, 23);
             LinkTxt.TabIndex = 1;
             // 
             // label2
@@ -79,9 +79,9 @@
             // btnDownload
             // 
             btnDownload.Enabled = false;
-            btnDownload.Location = new Point(61, 467);
+            btnDownload.Location = new Point(150, 532);
             btnDownload.Name = "btnDownload";
-            btnDownload.Size = new Size(114, 27);
+            btnDownload.Size = new Size(104, 60);
             btnDownload.TabIndex = 4;
             btnDownload.Text = "Download";
             btnDownload.UseVisualStyleBackColor = true;
@@ -89,23 +89,23 @@
             // 
             // progressBar1
             // 
-            progressBar1.Location = new Point(181, 432);
+            progressBar1.Location = new Point(260, 531);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(586, 62);
+            progressBar1.Size = new Size(633, 60);
             progressBar1.TabIndex = 5;
             // 
             // txtOutputFolder
             // 
             txtOutputFolder.Location = new Point(150, 76);
             txtOutputFolder.Name = "txtOutputFolder";
-            txtOutputFolder.Size = new Size(617, 23);
+            txtOutputFolder.Size = new Size(743, 23);
             txtOutputFolder.TabIndex = 7;
             // 
             // btnGetVideos
             // 
-            btnGetVideos.Location = new Point(61, 432);
+            btnGetVideos.Location = new Point(33, 530);
             btnGetVideos.Name = "btnGetVideos";
-            btnGetVideos.Size = new Size(114, 29);
+            btnGetVideos.Size = new Size(111, 62);
             btnGetVideos.TabIndex = 8;
             btnGetVideos.Text = "Get videos";
             btnGetVideos.UseVisualStyleBackColor = true;
@@ -117,18 +117,19 @@
             listView1.GridLines = true;
             listView1.Location = new Point(32, 111);
             listView1.Name = "listView1";
-            listView1.Size = new Size(735, 315);
+            listView1.Size = new Size(861, 414);
             listView1.TabIndex = 9;
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.View = View.Details;
             listView1.DoubleClick += listView1_DoubleClick;
+            listView1.KeyDown += listView1_KeyDown_1;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ButtonFace;
-            ClientSize = new Size(808, 506);
+            ClientSize = new Size(915, 603);
             Controls.Add(listView1);
             Controls.Add(btnGetVideos);
             Controls.Add(txtOutputFolder);
